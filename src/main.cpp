@@ -8,6 +8,7 @@
 #include <avr/io.h>
 #include <util/delay.h>
 #include <avr/interrupt.h>
+//#include <avr/>
 #include <stdio.h>
 
 #include "terminal.h"
@@ -15,15 +16,16 @@
 #include "distance.h"
 
 cButton Button = cButton();
-cDistance Distance = cDistance();
+
 void button(bool state, uint8_t counts)
 {
 	printf("btn!\n");
 }
 
+volatile uint16_t halfMicro = 0;
+
 int main ( void )
 {
-
 	sei();
 	printf("main()\n");
 
@@ -32,14 +34,17 @@ int main ( void )
 	uint8_t div = 0;
 	while(1)
 	{
-		if (++div > 50)
+		if (++div > 5)
 		{
 			div = 0;
-			printf("dist: %d\n", Distance.sample());
+			printf("distance: %dcm\n", Distance.getSample());
 		}
 		Button.run();
 		Terminal.run();
+		Distance.sample();
 		_delay_ms(100);
 	}
 	return 0;
 }
+
+

@@ -20,12 +20,19 @@
 #define ECHO_PIN  		PINC
 #define ECHO_PIN_NUM 	PC2
 
+
 class cDistance {
-	uint8_t sampleLen = 0;
+	uint16_t lastSample = 0;
 public:
 	cDistance();
 	uint16_t sample();
+
+	void setSample(uint16_t sample);
+	uint16_t getSample();
+
 	virtual ~cDistance();
 };
+
+extern cDistance Distance;
 
 #endif /* SRC_DISTANCE_H_ */

@@ -7,6 +7,7 @@
 
 #include "distance.h"
 #include <avr/io.h>
+#include <avr/interrupt.h>
 #include <util/delay.h>
 #include <stdio.h>
 
@@ -16,12 +17,14 @@ cDistance::cDistance()
 	TRIG_DDR |= _BV(TRIG_PIN_NUM);
 	TRIG_PORT &= ~(_BV(TRIG_PIN_NUM));
 
-
 	//echo as input
 	ECHO_DDR &= ~(_BV(ECHO_PIN_NUM));
 
-	printf("distance init()\n");
+	//interrupt
+	PCMSK1 |= (1 << PCINT10);
+	PCICR |= (1 << PCIE1);
 
+	printf("distance init()\n");
 }
 
 cDistance::~cDistance() {
@@ -31,19 +34,38 @@ cDistance::~cDistance() {
 
 uint16_t cDistance::sample()
 {
-	printf("s\n");
-	uint16_t count = 0;
-	//pulse echo
 	TRIG_PORT |= _BV(TRIG_PIN_NUM);
 	_delay_us(10);
 	TRIG_PORT &= ~(_BV(TRIG_PIN_NUM));
 
-	while((ECHO_PIN & _BV(ECHO_PIN_NUM)) == 0)
+	return 0;
+}
+
+void cDistance::setSample(uint16_t sample)
+{
+	lastSample = (uint16_t)(sample/14.5);
+}
+
+uint16_t cDistance::getSample()
+{
+	return lastSample;
+}
+
+ISR(PCINT1_vect)
+{
+	if(((ECHO_PIN & _BV(ECHO_PIN_NUM)) == 0))
 	{
-		_delay_us(1);
-		count++;
+		Distance.setSample(TCNT1);
+		//disable the  timer
+		TCCR1B &= ~(0x03);
+
+	}else
+	{
+		//enable the  timer
+		TCNT1 = 0;
+		TCCR1B |= 0x03 ;
 	}
 
-
-	return count++;
 }
+
+cDistance Distance = cDistance();
