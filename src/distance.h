@@ -22,13 +22,13 @@
 
 
 class cDistance {
-	uint16_t lastSample = 0;
+	uint8_t lastSample = 0;
 public:
 	cDistance();
-	uint16_t sample();
+	void sample();
 
 	void setSample(uint16_t sample);
-	uint16_t getSample();
+	uint8_t getSample();
 
 	virtual ~cDistance();
 };

@@ -13,19 +13,17 @@ cButton::cButton()
 
 	//set the button as input
 	BUTTON_DDR &= ~(_BV(BUTTON_PIN_NUM));
-
 	//enable pull-up
 	BUTTON_PORT |= _BV(BUTTON_PIN_NUM);
+
 	mState = (BUTTON_PIN & _BV(BUTTON_PIN_NUM));
 }
 
-void cButton::setCB(void (*cb)(bool, uint8_t))
+void cButton::setCB(void (*cb)(bool))
 {
 	if(cb)
 		callback = cb;
 }
-
-uint8_t count = 0;
 
 void cButton::run()
 {
@@ -35,18 +33,10 @@ void cButton::run()
 	bool tmpState = (BUTTON_PIN & _BV(BUTTON_PIN_NUM));
 
 	if (mState == tmpState)
-	{
-		//button not pressed
-		if (tmpState)
-			return;
+	    return;
 
-		callback(mState, count++);
-		return;
-	}
-
-	count = 0;
 	mState = tmpState;
-	callback(mState, 0);
+	callback(mState);
 }
 
 cButton::~cButton()

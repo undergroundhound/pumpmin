@@ -19,13 +19,13 @@
 
 class cButton
 {
-	void (*callback)(bool, uint8_t) = 0;
+	void (*callback)(bool) = 0;
 	bool mState;
 public:
 	cButton();
 	virtual ~cButton();
 
-	void setCB(void (*cb)(bool, uint8_t));
+	void setCB(void (*cb)(bool));
 	void run();
 };
 

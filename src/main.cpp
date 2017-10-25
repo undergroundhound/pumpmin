@@ -8,18 +8,28 @@
 #include <avr/io.h>
 #include <util/delay.h>
 #include <avr/interrupt.h>
-//#include <avr/>
 #include <stdio.h>
 
 #include "terminal.h"
 #include "button.h"
-#include "distance.h"
+#include "dist_mon.h"
+#include "alarm.h"
 
+cAlarm Alarm = cAlarm();
 cButton Button = cButton();
 
-void button(bool state, uint8_t counts)
+cDistMon DistMon = cDistMon(&Alarm);
+
+
+void button(bool state)
 {
-	printf("btn!\n");
+    printf("btn! %d\n", state);
+
+    if (state)
+    {
+        DistMon.dismissAlarm();
+        printf("AlarmDismissed!\n");
+    }
 }
 
 volatile uint16_t halfMicro = 0;
@@ -31,18 +41,13 @@ int main ( void )
 
 	Button.setCB(&button);
 
-	uint8_t div = 0;
 	while(1)
 	{
-		if (++div > 5)
-		{
-			div = 0;
-			printf("distance: %dcm\n", Distance.getSample());
-		}
+	    Alarm.run();
 		Button.run();
 		Terminal.run();
-		Distance.sample();
-		_delay_ms(100);
+		DistMon.run();
+		_delay_ms(50);
 	}
 	return 0;
 }

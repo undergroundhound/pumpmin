@@ -32,28 +32,33 @@ cDistance::~cDistance() {
 }
 
 
-uint16_t cDistance::sample()
+void cDistance::sample()
 {
 	TRIG_PORT |= _BV(TRIG_PIN_NUM);
 	_delay_us(10);
 	TRIG_PORT &= ~(_BV(TRIG_PIN_NUM));
 
-	return 0;
+	return;
 }
 
 void cDistance::setSample(uint16_t sample)
 {
-	lastSample = (uint16_t)(sample/14.5);
+	uint8_t tmp = (uint8_t)(sample/145);
+
+	if (tmp > 255)
+		return;
+
+	lastSample = tmp;
 }
 
-uint16_t cDistance::getSample()
+uint8_t cDistance::getSample()
 {
 	return lastSample;
 }
 
 ISR(PCINT1_vect)
 {
-	if(((ECHO_PIN & _BV(ECHO_PIN_NUM)) == 0))
+	if((ECHO_PIN & _BV(ECHO_PIN_NUM)) == 0)
 	{
 		Distance.setSample(TCNT1);
 		//disable the  timer
@@ -65,7 +70,6 @@ ISR(PCINT1_vect)
 		TCNT1 = 0;
 		TCCR1B |= 0x03 ;
 	}
-
 }
 
 cDistance Distance = cDistance();
